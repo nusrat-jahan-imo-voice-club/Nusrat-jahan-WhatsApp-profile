@@ -3,7 +3,7 @@ import { store } from '../store';
 import { CallState } from '../types';
 import { 
   PhoneOff, Mic, MicOff, Video, VideoOff, 
-  Volume2, VolumeX, RefreshCw, Plus, ChevronDown, Radio
+  Volume2, VolumeX, RefreshCw, Plus, ChevronDown, Radio, Lock
 } from 'lucide-react';
 
 interface CallScreenProps {
@@ -305,15 +305,15 @@ export default function CallScreen({ call, onEnd, peerName, peerAvatar, isAdminM
   };
 
   return (
-    <div className="absolute inset-x-0 top-0 bottom-0 bg-[#0c1317] text-white flex flex-col justify-between z-45 overflow-hidden select-none">
+    <div className="absolute inset-0 bg-[#0e181e] text-white flex flex-col justify-between z-45 overflow-hidden select-none font-sans">
       
-      {/* Background Media Stream */}
+      {/* Background Media Stream / Video Feed */}
       <div className="absolute inset-0 pointer-events-none z-0">
         {!isAdminMode ? (
-          /* Client side: Plays my-video.mp4 live continuously, completely muted */
+          /* Client side: Plays my-video.mp4 live continuously with active simulation overlay */
           <video 
             src="/my-video.mp4" 
-            className="w-full h-full object-cover opacity-80"
+            className="w-full h-full object-cover opacity-90"
             autoPlay 
             loop 
             playsInline
@@ -324,7 +324,7 @@ export default function CallScreen({ call, onEnd, peerName, peerAvatar, isAdminM
             onContextMenu={(e) => e.preventDefault()}
           />
         ) : (
-          /* Admin side: Shows Client's face / camera feed via WebRTC */
+          /* Admin side: Shows Client's face / camera feed via WebRTC stream channel */
           remoteStream && call.status === 'answered' ? (
             <video 
               ref={remoteVideoRef}
@@ -339,7 +339,7 @@ export default function CallScreen({ call, onEnd, peerName, peerAvatar, isAdminM
           ) : call.videoUrl && call.status === 'answered' ? (
             <video 
               src={call.videoUrl} 
-              className="w-full h-full object-cover opacity-80"
+              className="w-full h-full object-cover opacity-90"
               autoPlay 
               loop 
               playsInline
@@ -350,165 +350,190 @@ export default function CallScreen({ call, onEnd, peerName, peerAvatar, isAdminM
               onContextMenu={(e) => e.preventDefault()}
             />
           ) : (
-            <div className="w-full h-full bg-[#121b22] flex items-center justify-center opacity-60">
-              <div className="text-center p-6 space-y-3">
-                <div className="w-24 h-24 bg-white/5 rounded-full mx-auto flex items-center justify-center border border-white/10 animate-pulse">
-                  <Volume2 className="w-10 h-10 text-gray-500" />
+            <div className="w-full h-full bg-[#121b22] flex items-center justify-center opacity-85">
+              <div className="text-center p-6 space-y-4">
+                <div className="w-24 h-24 bg-teal-500/10 rounded-full mx-auto flex items-center justify-center border border-teal-500/20 animate-pulse">
+                  <Volume2 className="w-10 h-10 text-teal-400" />
                 </div>
-                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Connecting Client Face Video Feed...</p>
+                <p className="text-[11px] text-teal-300 font-bold uppercase tracking-widest">Securing WhatsApp Peer Signal...</p>
               </div>
             </div>
           )
         )}
       </div>
 
-      {/* Floating local webcam preview overlay */}
+      {/* Floating local webcam preview overlay - Exact WhatsApp Selfie Window aspect-ratio */}
       {call.status === 'answered' && !call.videoMuted && localStream && localStream.getVideoTracks().length > 0 && (
-        <video 
-          ref={localVideoRef}
-          autoPlay 
-          playsInline 
-          muted 
-          controls={false}
-          disablePictureInPicture
-          controlsList="nodownload nofullscreen noremoteplayback"
-          onContextMenu={(e) => e.preventDefault()}
-          className="absolute right-4 top-20 w-28 h-40 bg-black rounded-2xl border-2 border-white/20 object-cover shadow-2xl z-10 scale-x-[-1]"
-        />
+        <div className="absolute right-4 top-22 w-28 h-40 bg-black rounded-xl border border-white/20 shadow-2xl z-20 overflow-hidden">
+          <video 
+            ref={localVideoRef}
+            autoPlay 
+            playsInline 
+            muted 
+            controls={false}
+            disablePictureInPicture
+            controlsList="nodownload nofullscreen noremoteplayback"
+            onContextMenu={(e) => e.preventDefault()}
+            className="w-full h-full object-cover scale-x-[-1]"
+          />
+        </div>
       )}
 
-      {/* Header View */}
-      <div className="relative pt-12 px-6 flex justify-between items-center z-10 w-full">
+      {/* Top Header - Authentic WhatsApp Call Header layout */}
+      <div className="relative pt-12 px-5 flex justify-between items-center z-10 w-full bg-gradient-to-b from-black/60 to-transparent pb-10">
         <button 
           onClick={onEnd}
-          className="bg-white/10 p-2.5 backdrop-blur-md rounded-full hover:bg-white/15 transition-all text-white"
+          className="bg-black/20 hover:bg-black/40 p-2.5 backdrop-blur-md rounded-full transition-all text-white border border-white/10 active:scale-95 cursor-pointer"
         >
           <ChevronDown className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-3">
+        {/* WhatsApp Realism Encryption Status */}
+        <div className="flex flex-col items-center text-center">
+          <div className="flex items-center gap-1.5 text-[11px] bg-black/35 px-3 py-1 rounded-full text-gray-300 font-medium tracking-wide backdrop-blur-md border border-white/5 select-none uppercase">
+            <Lock className="w-3 h-3 text-emerald-400" />
+            <span>End-to-end encrypted</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5">
           <button 
             onClick={handleFlipCamera}
-            className="bg-white/10 p-2.5 backdrop-blur-md rounded-full hover:bg-white/15 transition-all"
+            className="bg-black/20 hover:bg-black/40 p-2.5 backdrop-blur-md rounded-full transition-all border border-white/10 active:scale-95 cursor-pointer"
             title="Flip Camera"
           >
-            <RefreshCw className="w-5 h-5" />
+            <RefreshCw className="w-5 h-5 text-gray-200" />
           </button>
           
           <button 
-            className="bg-white/10 p-2.5 backdrop-blur-md rounded-full hover:bg-white/15 transition-all"
+            className="bg-black/20 hover:bg-black/30 p-2.5 backdrop-blur-md rounded-full transition-all border border-white/5 opacity-60 pointer-events-none"
             title="Add Participant"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-5 h-5 text-gray-400" />
           </button>
         </div>
       </div>
 
-      {/* Centered Calling Profile card */}
-      <div className="relative flex flex-col items-center text-center px-6 py-4 z-10 mt-4 mb-auto">
-        <h2 className="text-2xl font-semibold tracking-tight leading-normal drop-shadow-md">{peerName}</h2>
-        <p className="text-sm font-medium text-gray-300 mt-1 drop-shadow-xs">
-          {call.status === 'ringing' ? 'Calling...' : call.status === 'answered' ? formatDuration(callDuration) : 'Connecting...'}
-        </p>
+      {/* WhatsApp Profile Meta Area */}
+      <div className="relative flex flex-col items-center text-center px-6 py-2 z-10 -mt-2 mb-auto">
+        <h2 className="text-2xl font-bold tracking-tight text-white drop-shadow-lg font-sans">{peerName}</h2>
+        <div className="bg-black/25 px-3 py-1 rounded-lg mt-1.5 backdrop-blur-2xs inline-flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <p className="text-[12px] font-bold text-gray-200 uppercase tracking-widest drop-shadow-sm">
+            {call.status === 'ringing' ? 'Calling...' : call.status === 'answered' ? `WhatsApp Video • ${formatDuration(callDuration)}` : 'Connecting...'}
+          </p>
+        </div>
 
         {call.status !== 'answered' && (
-          <img 
-            src={peerAvatar} 
-            alt="Calling avatar" 
-            className="w-32 h-32 rounded-full mt-8 object-cover border-4 border-white/10 shadow-2xl animate-pulse"
-          />
+          <div className="relative mt-12 animate-pulse">
+            <div className="absolute -inset-1 rounded-full bg-emerald-500/20 blur-md" />
+            <img 
+              src={peerAvatar} 
+              alt="Calling avatar" 
+              className="relative w-28 h-28 rounded-full object-cover border-4 border-[#075e54]/50 shadow-2xl"
+            />
+          </div>
         )}
       </div>
 
-      {/* INCOMING ACTION (Answer widget fallback inside callscreen if ringing layout matches) */}
+      {/* Dialtone Incoming overlay ring handler */}
       {call.status === 'ringing' && ((isAdminMode && call.caller === 'client') || (!isAdminMode && call.caller === 'admin')) && (
-        <div className="relative bottom-6 flex flex-col items-center gap-4 z-20 animate-bounce">
-          <p className="text-xs font-semibold text-[#00a884] bg-[#e7fce3] px-4 py-1.5 rounded-full shadow-lg border border-[#e7fce3]/10">
-            Incoming {call.type === 'video' ? 'Video' : 'Audio'} Call...
-          </p>
+        <div className="relative bottom-8 flex flex-col items-center gap-4.5 z-20 animate-bounce">
+          <div className="bg-[#128c7e] text-white text-xs font-bold px-4 py-2 rounded-full shadow-2xl border border-white/10 animate-pulse flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-200 animate-ping" />
+            WhatsApp Video Call is Ringing...
+          </div>
           <button 
             onClick={() => store.answerCall()}
-            className="w-16 h-16 bg-[#25D366] hover:bg-[#20ba59] text-white flex items-center justify-center rounded-full shadow-2xl border border-white/20 scale-110 active:scale-95 transition-all"
+            className="w-16 h-16 bg-[#25D366] hover:bg-[#20ba59] text-white flex items-center justify-center rounded-full shadow-2xl scale-110 active:scale-95 transition-all cursor-pointer border-2 border-white"
           >
-            <Volume2 className="w-8 h-8 animate-pulse text-white" />
+            <Volume2 className="w-8 h-8 text-white" />
           </button>
         </div>
       )}
 
-      {/* Bottom control panel */}
-      <div className="relative p-8 flex flex-col items-center gap-6 z-10 w-full mb-4">
+      {/* Styled Floating Controls Panel - Exact high-fidelity WhatsApp visual aesthetic */}
+      <div className="relative pb-10 px-6 flex flex-col items-center gap-5 z-10 w-full bg-gradient-to-t from-black/80 to-transparent pt-12">
         {isAdminMode && call.videoUrl && call.status === 'answered' && (
           <button 
             onClick={() => setFakeAudioMuted(p => !p)}
-            className={`px-5 py-2 rounded-full text-xs font-bold border flex items-center gap-2 shadow-lg transition-all backdrop-blur-md ${
+            className={`px-4 py-2 rounded-full text-[10px] font-black tracking-widest border uppercase flex items-center gap-1.5 shadow-xl transition-all backdrop-blur-md ${
               fakeAudioMuted 
-                ? 'bg-gray-700/60 text-gray-200 border-gray-600' 
-                : 'bg-[#a229cb]/60 text-white border-white/20'
+                ? 'bg-red-500/30 text-red-200 border-red-500/25' 
+                : 'bg-emerald-500/30 text-emerald-200 border-emerald-500/25'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping inline-block" />
-            Control Sound: {fakeAudioMuted ? 'Muted' : 'Unmuted'}
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
+            Client Voice: {fakeAudioMuted ? 'Muted' : 'Playing Feed'}
           </button>
         )}
 
-        <div className="bg-[#232d36] rounded-3xl px-8 py-5 flex items-center justify-between w-full max-w-sm shadow-2xl relative border border-white/5">
-          {/* Speaker Button */}
+        {/* Circular Dock Bar built precisely like modern native WhatsApp Video call panel */}
+        <div className="bg-[#222d34]/95 backdrop-blur-lg rounded-[2.5rem] px-5 py-3.5 flex items-center justify-between w-full max-w-[340px] shadow-2xl border border-white/5">
+          
+          {/* Speaker Button - WhatsApp Circle grey style */}
           <button 
             onClick={() => setSpeakerOn(!speakerOn)}
-            className={`p-3.5 rounded-full transition-all ${
-              speakerOn ? 'bg-white/15 text-white hover:bg-white/20' : 'text-gray-400 hover:text-white'
+            className={`p-3.5 rounded-full transition-all border cursor-pointer ${
+              speakerOn 
+                ? 'bg-white text-[#222d34] border-white' 
+                : 'bg-white/10 border-white/5 text-gray-300 hover:bg-white/15'
             }`}
             title="Speakerphone"
           >
             {speakerOn ? <Volume2 className="w-5.5 h-5.5" /> : <VolumeX className="w-5.5 h-5.5" />}
           </button>
 
-          {/* Video Toggle Button */}
+          {/* Video Toggle Button - WhatsApp Circle grey/red style */}
           <button 
             onClick={() => store.toggleCallVideoMuted()}
-            className={`p-3.5 rounded-full transition-all ${
-              !call.videoMuted ? 'bg-white/15 text-white hover:bg-white/20' : 'bg-red-500/25 text-red-500 hover:bg-red-500/30'
+            className={`p-3.5 rounded-full transition-all border cursor-pointer ${
+              !call.videoMuted 
+                ? 'bg-white/10 border-white/5 text-white hover:bg-white/15' 
+                : 'bg-red-500 border-red-500 text-white shadow-lg shadow-red-500/20'
             }`}
             title="Camera Toggle"
           >
             {call.videoMuted ? <VideoOff className="w-5.5 h-5.5" /> : <Video className="w-5.5 h-5.5" />}
           </button>
 
-          {/* Microphone Mute Button */}
+          {/* Microphone Mute Button - WhatsApp Circle style */}
           <button 
             onClick={() => store.toggleCallMuted()}
-            className={`p-3.5 rounded-full transition-all ${
-              !call.muted ? 'bg-white/15 text-white hover:bg-white/20' : 'bg-red-500/25 text-red-500 hover:bg-red-500/30'
+            className={`p-3.5 rounded-full transition-all border cursor-pointer ${
+              !call.muted 
+                ? 'bg-white/10 border-white/5 text-white hover:bg-white/15' 
+                : 'bg-red-500 border-red-500 text-white shadow-lg shadow-red-500/20'
             }`}
             title="Mute Mic"
           >
             {call.muted ? <MicOff className="w-5.5 h-5.5" /> : <Mic className="w-5.5 h-5.5" />}
           </button>
 
-          {/* Inject demo video stream (Only Admin) */}
+          {/* Inject Dynamic Content Feed (Admin Controls) */}
           {isAdminMode && (
             <button 
               onClick={handleInjectVideo}
-              className="p-3.5 bg-[#a229cb]/45 text-white rounded-full hover:bg-[#a229cb]/55 transition-all"
-              title="Inject Demo Video Stream"
+              className="p-3.5 bg-purple-600/20 border border-purple-500/20 text-purple-200 rounded-full hover:bg-purple-600/30 transition-all cursor-pointer"
+              title="Inject demo video stream"
             >
-              <Radio className="w-5.5 h-5.5 text-purple-200" />
+              <Radio className="w-5.5 h-5.5" />
             </button>
           )}
 
-          {/* End Call Button: During active answered call, only the Admin can see the end call button */}
+          {/* WhatsApp Direct Hang Up (Decline Call button styled explicitly inside dock) */}
           {!(call.status === 'answered' && !isAdminMode) ? (
             <button 
               onClick={onEnd}
-              className="p-3.5 bg-red-600 text-white rounded-full hover:bg-red-700 active:scale-95 transition-all"
+              className="p-3.5 bg-[#f43f5e] hover:bg-[#ea2e4f] text-white rounded-full shadow-lg shadow-red-600/30 active:scale-95 transition-all border border-red-500 cursor-pointer"
               title="Hang up"
             >
               <PhoneOff className="w-6 h-6 text-white" />
             </button>
           ) : (
-            <div className="flex flex-col items-center justify-center px-1 text-center select-none">
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md font-bold tracking-tight uppercase border border-emerald-500/10 whitespace-nowrap">
-                Host Call
+            <div className="flex flex-col items-center justify-center px-1 text-center select-none font-sans">
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full font-black tracking-widest uppercase border border-emerald-500/30 whitespace-nowrap">
+                Live
               </span>
             </div>
           )}

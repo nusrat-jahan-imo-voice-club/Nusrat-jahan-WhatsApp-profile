@@ -510,12 +510,14 @@ export default function ClientView({ chat, currentCall, onOpenLogin }: ClientVie
                   >
                     📲 মোবাইলে অ্যাপ ইন্সটল করুন
                   </button>
+                  {/* Hidden for some time:
                   <button 
                     onClick={onOpenLogin}
                     className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 font-medium transition-colors flex items-center gap-2"
                   >
                     🔄 Switch to Support Desk
                   </button>
+                  */}
                   <button 
                     onClick={() => {
                       if (confirm('রিসেট করতে চান? আপনার চ্যাট হিস্টোরি ক্লিয়ার হবে।')) {
