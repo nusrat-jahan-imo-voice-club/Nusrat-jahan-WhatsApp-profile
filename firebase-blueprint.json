@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "ChatSession": {
+      "title": "ChatSession",
+      "description": "Represents an active chat session with messages directly stored inside the document",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "userInfo": {
+          "type": "object",
+          "properties": {
+            "uid": { "type": "string" },
+            "nickname": { "type": "string" },
+            "avatar": { "type": "string" },
+            "lastTime": { "type": "string" },
+            "unreadCountAdmin": { "type": "integer" },
+            "isBlocked": { "type": "boolean" },
+            "typingClient": { "type": "boolean" },
+            "typingAdmin": { "type": "boolean" }
+          },
+          "required": ["uid", "nickname", "avatar", "lastTime", "unreadCountAdmin"]
+        },
+        "messages": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      },
+      "required": ["uid", "userInfo"]
+    },
+    "CallState": {
+      "title": "CallState",
+      "description": "Tracks state of an active or pending audio/video call",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "caller": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "videoUrl": { "type": "string" },
+        "muted": { "type": "boolean" },
+        "videoMuted": { "type": "boolean" }
+      },
+      "required": ["uid", "caller", "type", "status", "timestamp"]
+    },
+    "CallHistoryItem": {
+      "title": "CallHistoryItem",
+      "description": "A historic call entry log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "uid": { "type": "string" },
+        "status": { "type": "string" },
+        "direction": { "type": "string" },
+        "time": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "uid", "status", "direction", "time", "timestamp"]
+    }
+  },
+  "firestore": {
+    "chats/{clientId}": {
+      "schema": "ChatSession",
+      "description": "Chat sessions indexed by client UID"
+    },
+    "calls/{clientId}": {
+      "schema": "CallState",
+      "description": "Active or pending audio/video calls with the client"
+    },
+    "callHistory/{historyId}": {
+      "schema": "CallHistoryItem",
+      "description": "History collection of completed or missed calls"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "Remix: Office WhatsApp Inbox",
+  "description": "A feature-rich real-time WhatsApp-style communication hub for clients and office support, featuring chat, attachments, voice messages, and video calls.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
